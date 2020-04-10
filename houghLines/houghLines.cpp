@@ -8,7 +8,7 @@ int main()
 {
 	cv::Mat dstMat;
 	cv::Mat cannyMat;
-	cv::Mat binMat = cv::imread("D:\\Files\\metal-part-distorted-03.png", 0);
+	cv::Mat gryMat = cv::imread("D:\\Files\\metal-part-distorted-03.png", 0);
 	cv::Mat srcMat = cv::imread("D:\\Files\\metal-part-distorted-03.png");//读取图像
 	//检测图像读取是否成功
 	if (srcMat.empty())
@@ -16,11 +16,11 @@ int main()
 		return -1;
 	}
 	//用Canny算子进行边缘检测
-	cv::Canny(binMat, cannyMat, 100, 250, 3);
+	cv::Canny(gryMat, cannyMat, 100, 250, 3);
 	cv::imshow("canny", cannyMat);
 	//进行霍夫变换
 	cv::Mat lineMat;
-	cv::HoughLines(cannyMat, lineMat, 1, CV_PI / 180, 42);
+	cv::HoughLines(cannyMat, lineMat, 1, CV_PI / 180, 100);
 	//绘制直线
 	for (int i = 0; i < lineMat.rows; i++)
 	{
@@ -33,7 +33,7 @@ int main()
 		pt1.x = cv::saturate_cast<int>(x0 + 1000 * (-b));
 		pt1.y = cv::saturate_cast<int>(y0 + 1000 * (a));
 		pt2.x = cv::saturate_cast<int>(x0 - 1000 * (-b));
-		pt2.y = cv::saturate_cast<int>(y0 - 1000 * (-b));
+		pt2.y = cv::saturate_cast<int>(y0 - 1000 * (a));
 		cv::line(srcMat, pt1, pt2, cv::Scalar(0, 0, 255), 1, CV_AA);
 		//显示结果
 		cv::imshow("dst", srcMat);
