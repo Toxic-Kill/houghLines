@@ -1,20 +1,43 @@
-﻿// houghLines.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
-//
+﻿#include <iostream>
+#include<opencv2/opencv.hpp>
 
-#include <iostream>
+using namespace std;
+using namespace cv;
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	cv::Mat dstMat;
+	cv::Mat cannyMat;
+	cv::Mat binMat = cv::imread("D:\\Files\\metal-part-distorted-03.png", 0);
+	cv::Mat srcMat = cv::imread("D:\\Files\\metal-part-distorted-03.png");//读取图像
+	//检测图像读取是否成功
+	if (srcMat.empty())
+	{
+		return -1;
+	}
+	//用Canny算子进行边缘检测
+	cv::Canny(binMat, cannyMat, 100, 250, 3);
+	cv::imshow("canny", cannyMat);
+	//进行霍夫变换
+	cv::Mat lineMat;
+	cv::HoughLines(cannyMat, lineMat, 1, CV_PI / 180, 42);
+	//绘制直线
+	for (int i = 0; i < lineMat.rows; i++)
+	{
+		float rho = lineMat.at<Vec2f>(i, 0)[0], theta = lineMat.at<Vec2f>(i, 0)[1];
+		cv::Point pt1, pt2;
+		double a = cos(theta);
+		double b = sin(theta);
+		double x0 = a * rho;
+		double y0 = b * rho;
+		pt1.x = cv::saturate_cast<int>(x0 + 1000 * (-b));
+		pt1.y = cv::saturate_cast<int>(y0 + 1000 * (a));
+		pt2.x = cv::saturate_cast<int>(x0 - 1000 * (-b));
+		pt2.y = cv::saturate_cast<int>(y0 - 1000 * (-b));
+		cv::line(srcMat, pt1, pt2, cv::Scalar(0, 0, 255), 1, CV_AA);
+		//显示结果
+		cv::imshow("dst", srcMat);
+		cv::imshow("canny", cannyMat);
+	}
+	waitKey(0);
 }
-
-// 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单
-// 调试程序: F5 或调试 >“开始调试”菜单
-
-// 入门使用技巧: 
-//   1. 使用解决方案资源管理器窗口添加/管理文件
-//   2. 使用团队资源管理器窗口连接到源代码管理
-//   3. 使用输出窗口查看生成输出和其他消息
-//   4. 使用错误列表窗口查看错误
-//   5. 转到“项目”>“添加新项”以创建新的代码文件，或转到“项目”>“添加现有项”以将现有代码文件添加到项目
-//   6. 将来，若要再次打开此项目，请转到“文件”>“打开”>“项目”并选择 .sln 文件
